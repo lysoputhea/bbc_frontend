@@ -11,9 +11,11 @@ import {
   Divider,
   Box,
 } from "@mui/material";
+import { Menu as MenuIcon } from "@mui/icons-material"; // Add this import
 import { useAuth } from "../context/AuthContext";
 
-const Header = () => {
+const Header = ({ toggleSidebar }) => {
+  // Add toggleSidebar prop
   const { user, logout } = useAuth();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -26,11 +28,6 @@ const Header = () => {
     window.location.href = "/profile";
   };
 
-  // const handleChangePasswordClick = () => {
-  //   handleMenuClose();
-  //   window.location.href = "/change-password";
-  // };
-
   return (
     <AppBar
       position="sticky"
@@ -42,14 +39,34 @@ const Header = () => {
       }}
     >
       <Toolbar sx={{ justifyContent: "space-between" }}>
-        {/* Left side - app title */}
-        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-          School Management
-        </Typography>
+        {/* Left side - hamburger menu for mobile + app title */}
+        <Box display="flex" alignItems="center" gap={2}>
+          {/* Hamburger menu button - visible only on mobile */}
+          <IconButton
+            onClick={toggleSidebar}
+            sx={{
+              display: { xs: "flex", md: "none" }, // Show only on mobile
+              color: "#111827",
+            }}
+          >
+            <MenuIcon />
+          </IconButton>
+
+          {/* App title */}
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            School Management
+          </Typography>
+        </Box>
 
         {/* Right side - user info */}
         <Box display="flex" alignItems="center" gap={1}>
-          <Typography variant="body1" sx={{ fontWeight: 500 }}>
+          <Typography
+            variant="body1"
+            sx={{
+              fontWeight: 500,
+              display: { xs: "none", sm: "block" }, // Hide on very small screens
+            }}
+          >
             {user?.username}
           </Typography>
           <IconButton onClick={handleMenuOpen} size="large">
@@ -68,12 +85,6 @@ const Header = () => {
             <MenuItem onClick={handleProfileClick} sx={{ fontWeight: 500 }}>
               <Typography variant="body2">Profile</Typography>
             </MenuItem>
-            {/* <MenuItem
-              onClick={handleChangePasswordClick}
-              sx={{ fontWeight: 500 }}
-            >
-              <Typography variant="body2">Change Password</Typography>
-            </MenuItem> */}
             <Divider />
             <MenuItem
               onClick={() => {

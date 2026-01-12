@@ -15,6 +15,7 @@ const MainLayout = ({ children }) => {
     <div className="flex h-screen bg-gray-100 font-sans">
       <Sidebar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
       <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Pass toggleSidebar to Header */}
         <Header toggleSidebar={toggleSidebar} />
 
         <main
