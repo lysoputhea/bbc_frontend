@@ -243,20 +243,20 @@ const Classes = () => {
 
   // DataGrid columns
   const columns = [
-    { field: "class_id", headerName: "ID", flex: 0.5 },
-    { field: "room_number", headerName: "Room Number", flex: 1 },
-    { field: "book", headerName: "Book", flex: 1 },
-    { field: "branch_name", headerName: "Branch", flex: 1 },
+    { field: "class_id", headerName: "ID", width: 90 },
+    { field: "room_number", headerName: "Room Number", width: 150 },
+    { field: "book", headerName: "Book", width: 150 },
+    { field: "branch_name", headerName: "Branch", width: 90 },
     {
       field: "price",
       headerName: "Price",
-      flex: 1,
+      width: 90,
       renderCell: (params) => `$${params.value}`,
     },
     {
       field: "actions",
       headerName: "Actions",
-      flex: 1,
+      width: 100,
       sortable: false,
       align: "right",
       renderCell: (params) => (
