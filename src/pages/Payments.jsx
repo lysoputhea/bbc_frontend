@@ -111,7 +111,7 @@ const Payments = () => {
         `${API_BASE_URL}/payments?${params.toString()}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       if (!response.ok) throw new Error("Failed to fetch payments.");
       const data = await response.json();
@@ -127,7 +127,7 @@ const Payments = () => {
   const fetchEnrollmentsForSearch = async (
     branchId,
     classId,
-    studentName = ""
+    studentName = "",
   ) => {
     if (!branchId || !classId) {
       setStudentsForSearch([]);
@@ -143,7 +143,7 @@ const Payments = () => {
         `${API_BASE_URL}/enrollments?${params.toString()}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
       if (!response.ok) throw new Error("Failed to fetch enrollments.");
       const data = await response.json();
@@ -155,7 +155,7 @@ const Payments = () => {
           book: enrollment.book || "",
           room_number: enrollment.room_number || "",
           price: enrollment.price || "0",
-        })) || []
+        })) || [],
       );
     } catch (err) {
       setAlert(err.message || "Failed to fetch enrollments.", "error");
@@ -184,7 +184,7 @@ const Payments = () => {
     try {
       const response = await fetch(
         `${API_BASE_URL}/classes?branch_id=${branchId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       if (!response.ok)
         throw new Error("Failed to fetch classes for the selected branch.");
@@ -365,7 +365,7 @@ const Payments = () => {
       if (paymentData.branch_id && paymentData.class_id) {
         await fetchEnrollmentsForSearch(
           paymentData.branch_id,
-          paymentData.class_id
+          paymentData.class_id,
         );
       }
       setOpen(true);
@@ -557,7 +557,7 @@ const Payments = () => {
       return;
     const discountAmount = calculateDiscountAmount(
       paymentForm.original_amount,
-      paymentForm.discount_percentage
+      paymentForm.discount_percentage,
     );
     const paymentData = {
       ...paymentForm,
@@ -574,7 +574,7 @@ const Payments = () => {
     setOpenConfirm(false);
     const discountAmount = calculateDiscountAmount(
       paymentForm.original_amount,
-      paymentForm.discount_percentage
+      paymentForm.discount_percentage,
     );
     const paymentData = {
       ...paymentForm,
@@ -603,7 +603,7 @@ const Payments = () => {
           errorData.message ||
             (editingPayment
               ? "Failed to update payment."
-              : "Failed to create payment.")
+              : "Failed to create payment."),
         );
       }
       const responseData = await response.json();
@@ -611,7 +611,7 @@ const Payments = () => {
         editingPayment
           ? "Payment updated successfully!"
           : "Payment created successfully!",
-        "success"
+        "success",
       );
       fetchPayments();
       if (!editingPayment) {
@@ -634,7 +634,7 @@ const Payments = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
       if (!response.ok) {
         const errorData = await response.json();
@@ -912,7 +912,7 @@ const Payments = () => {
                       key={classItem.class_id}
                       value={classItem.class_id}
                     >
-                      {classItem.book}
+                      {classItem.room_number} - {classItem.book}
                     </MenuItem>
                   ))}
                 </Select>
@@ -938,7 +938,7 @@ const Payments = () => {
                     fetchEnrollmentsForSearch(
                       paymentForm.branch_id,
                       paymentForm.class_id,
-                      newInputValue
+                      newInputValue,
                     );
                   }
                 }}
@@ -1123,8 +1123,8 @@ const Payments = () => {
                   paymentForm.original_amount || 0,
                   calculateDiscountAmount(
                     paymentForm.original_amount || 0,
-                    paymentForm.discount_percentage || 0
-                  )
+                    paymentForm.discount_percentage || 0,
+                  ),
                 )}
                 disabled
               />
@@ -1247,8 +1247,8 @@ const Payments = () => {
                 paymentForm.original_amount || 0,
                 calculateDiscountAmount(
                   paymentForm.original_amount || 0,
-                  paymentForm.discount_percentage || 0
-                )
+                  paymentForm.discount_percentage || 0,
+                ),
               )}
             </Typography>
             <Typography>
