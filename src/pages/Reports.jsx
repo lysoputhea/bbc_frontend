@@ -125,7 +125,7 @@ const Reports = () => {
         `${API_BASE_URL}/reports/monthly-student-payments?${params.toString()}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -134,7 +134,7 @@ const Reports = () => {
         if (response.status === 404)
           throw new Error("Report endpoint not found.");
         throw new Error(
-          `Failed to generate report: ${response.status} ${response.statusText}`
+          `Failed to generate report: ${response.status} ${response.statusText}`,
         );
       }
 
@@ -153,7 +153,7 @@ const Reports = () => {
       console.error("Error generating report:", error);
       setAlert(
         error.message || "An error occurred while generating the report",
-        "error"
+        "error",
       );
     } finally {
       setIsLoading(false);
@@ -168,21 +168,16 @@ const Reports = () => {
     setAlert,
   ]);
 
-  const handleExportExcel = useCallback(() => {
-    if (reportData.length === 0) {
-      setAlert("No data to export", "warning");
-      return;
-    }
-
+  const handleExportExcel = () => {
     const data = reportData.map((row) => ({
       "Student ID": row.student_id || "",
       "Student Name": `${row.first_name || ""} ${row.last_name || ""}`.trim(),
-      Amount: row.total_amount || "",
+      Amount: parseFloat(row.total_amount ?? 0), // ✅ number
       Month: row.month || "",
       Branch: row.branch_name || "",
       Book: row.book || "",
       Room: row.room_number || "",
-      payment_date: row.payment_date
+      "Payment Date": row.payment_date
         ? dayjs(row.payment_date).format("YYYY-MM-DD")
         : "",
       "Due Date": row.due_date ? dayjs(row.due_date).format("YYYY-MM-DD") : "",
@@ -192,16 +187,24 @@ const Reports = () => {
     }));
 
     const ws = XLSX.utils.json_to_sheet(data);
+
+    // ✅ Force Amount column numeric
+    const amountColIndex = 2; // column C
+    const range = XLSX.utils.decode_range(ws["!ref"]);
+
+    for (let r = range.s.r + 1; r <= range.e.r; r++) {
+      const cell = XLSX.utils.encode_cell({ r, c: amountColIndex });
+      if (ws[cell]) {
+        ws[cell].t = "n";
+        ws[cell].v = Number(ws[cell].v);
+        ws[cell].z = "#,##0.00";
+      }
+    }
+
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Student Payments");
-
-    const filename = `student-payments-${startDate.format(
-      "YYYY-MM-DD"
-    )}_to_${endDate.format("YYYY-MM-DD")}.xlsx`;
-
-    XLSX.writeFile(wb, filename);
-    setAlert("Report exported to Excel", "success");
-  }, [reportData, startDate, endDate, setAlert]);
+    XLSX.writeFile(wb, "student-payments.xlsx");
+  };
 
   const columns = [
     {

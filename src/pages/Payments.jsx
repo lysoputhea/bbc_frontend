@@ -399,6 +399,10 @@ const Payments = () => {
           amountMultiplier = 1;
           dateMultiplier = 1;
           break;
+        case "2 Months":
+          amountMultiplier = 2;
+          dateMultiplier = 2;
+          break;
         case "3 Months":
           amountMultiplier = 3;
           dateMultiplier = 3;
@@ -440,6 +444,9 @@ const Payments = () => {
         switch (paymentForm.payment_period_type) {
           case "1 Month":
             dateMultiplier = 1;
+            break;
+          case "2 Months":
+            dateMultiplier = 2;
             break;
           case "3 Months":
             dateMultiplier = 3;
@@ -954,40 +961,7 @@ const Payments = () => {
                 disabled={!paymentForm.class_id || editingPayment}
               />
             </Grid>
-            {/* {selectedEnrollment && (
-                    <>
-                      <Grid size={{ xs: 12, md: 4 }}>
-                        <TextField
-                          margin="dense"
-                          label="Class"
-                          value={selectedEnrollment.book || ""}
-                          fullWidth
-                          size="small"
-                          disabled
-                        />
-                      </Grid>
-                      <Grid size={{ xs: 12, md: 4 }}>
-                        <TextField
-                          margin="dense"
-                          label="Room Number"
-                          value={selectedEnrollment.room_number || ""}
-                          fullWidth
-                          size="small"
-                          disabled
-                        />
-                      </Grid>
-                      <Grid size={{ xs: 12, md: 4 }}>
-                        <TextField
-                          margin="dense"
-                          label="Price Per Month"
-                          value={selectedEnrollment.price || "0"}
-                          fullWidth
-                          size="small"
-                          disabled
-                        />
-                      </Grid>
-                    </>
-                  )} */}
+
             <Grid size={{ xs: 12, md: 4 }}>
               <FormControl fullWidth margin="dense" size="small">
                 <InputLabel>Payment Period</InputLabel>
@@ -1000,6 +974,7 @@ const Payments = () => {
                   label="Payment Period"
                 >
                   <MenuItem value="1 Month">1 Month</MenuItem>
+                  <MenuItem value="2 Months">2 Months</MenuItem>
                   <MenuItem value="3 Months">3 Months</MenuItem>
                   <MenuItem value="6 Months">6 Months</MenuItem>
                   <MenuItem value="12 Months">12 Months</MenuItem>
@@ -1052,36 +1027,7 @@ const Payments = () => {
                 </DemoContainer>
               </LocalizationProvider>
             </Grid>
-            {/* <Grid size={{ xs: 12, md: 4 }}>
-                    <LocalizationProvider
-                      dateAdapter={AdapterDayjs}
-                      adapterLocale="en-gb"
-                    >
-                      <DemoContainer components={["DatePicker"]}>
-                        <DatePicker
-                          value={
-                            paymentForm.payment_date
-                              ? dayjs(paymentForm.payment_date)
-                              : null
-                          }
-                          onChange={(newValue) =>
-                            handleInputChange(
-                              "payment_date",
-                              newValue ? newValue.format("YYYY-MM-DD") : ""
-                            )
-                          }
-                          label="Payment Date"
-                          slotProps={{
-                            textField: {
-                              size: "small",
-                              error: !!formErrors.payment_date,
-                              helperText: formErrors.payment_date,
-                            },
-                          }}
-                        />
-                      </DemoContainer>
-                    </LocalizationProvider>
-                  </Grid> */}
+
             <Grid size={{ xs: 12, md: 4 }}>
               <TextField
                 margin="dense"
@@ -1129,22 +1075,6 @@ const Payments = () => {
                 disabled
               />
             </Grid>
-            {/* <Grid size={{ xs: 12, md: 4 }}>
-                    <FormControl fullWidth margin="dense" size="small">
-                      <InputLabel>Status</InputLabel>
-                      <Select
-                        name="status"
-                        value={paymentForm.status || ""}
-                        onChange={(e) =>
-                          handleInputChange(e.target.name, e.target.value)
-                        }
-                        label="Status"
-                      >
-                        <MenuItem value="Paid">Paid</MenuItem>
-                        <MenuItem value="Pending">Pending</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Grid> */}
           </Grid>
         </DialogContent>
         <DialogActions>
