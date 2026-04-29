@@ -240,7 +240,10 @@ const Payments = () => {
 
   useEffect(() => {
     const handler = setTimeout(() => {
-      if (token) fetchPayments();
+      if (token) {
+        setPaginationModel((prev) => ({ ...prev, page: 0 }));
+        fetchPayments();
+      }
     }, 500);
     return () => clearTimeout(handler);
   }, [filters, token]);
@@ -301,6 +304,46 @@ const Payments = () => {
     const amount = parseFloat(originalAmount) || 0;
     const discount = parseFloat(discountAmount) || 0;
     return (amount - discount).toFixed(2);
+  };
+
+  // ✅ Helper to calculate due_date based on period type and issue_date
+  const calculateDueDate = (issueDate, periodType) => {
+    switch (periodType) {
+      case "10 Days":
+        return issueDate.add(10, "day");
+      case "1 Month":
+        return issueDate.add(1, "month");
+      case "2 Months":
+        return issueDate.add(2, "month");
+      case "3 Months":
+        return issueDate.add(3, "month");
+      case "6 Months":
+        return issueDate.add(6, "month");
+      case "12 Months":
+        return issueDate.add(12, "month");
+      default:
+        return issueDate.add(3, "month");
+    }
+  };
+
+  // ✅ Helper to calculate amount multiplier based on period type
+  const getAmountMultiplier = (periodType) => {
+    switch (periodType) {
+      case "10 Days":
+        return 1 / 3; // ✅ 10 days ≈ 1/3 of a month
+      case "1 Month":
+        return 1;
+      case "2 Months":
+        return 2;
+      case "3 Months":
+        return 3;
+      case "6 Months":
+        return 6;
+      case "12 Months":
+        return 12;
+      default:
+        return 3;
+    }
   };
 
   const handleClickOpen = () => {
@@ -384,7 +427,7 @@ const Payments = () => {
 
   const handleInputChange = (name, value) => {
     let updatedPayment = { ...paymentForm, [name]: value };
-    let updatedAmount = paymentForm.original_amount;
+
     if (name === "original_amount" || name === "discount_percentage") {
       const cleaned = value.replace(/[^0-9.]/g, "");
       const parts = cleaned.split(".");
@@ -392,77 +435,32 @@ const Payments = () => {
         parts[0] + (parts[1] ? "." + parts.slice(1).join("") : "");
       updatedPayment = { ...paymentForm, [name]: numericValue };
     } else if (name === "payment_period_type") {
-      let amountMultiplier = 1;
-      let dateMultiplier = 1;
-      switch (value) {
-        case "1 Month":
-          amountMultiplier = 1;
-          dateMultiplier = 1;
-          break;
-        case "2 Months":
-          amountMultiplier = 2;
-          dateMultiplier = 2;
-          break;
-        case "3 Months":
-          amountMultiplier = 3;
-          dateMultiplier = 3;
-          break;
-        case "6 Months":
-          amountMultiplier = 6;
-          dateMultiplier = 6;
-          break;
-        case "12 Months":
-          amountMultiplier = 12;
-          dateMultiplier = 12;
-          break;
-        default:
-          amountMultiplier = 1;
-          dateMultiplier = 1;
-      }
-      if (selectedEnrollment?.price) {
-        updatedAmount = (
-          parseFloat(selectedEnrollment.price) * amountMultiplier
-        ).toFixed(2);
-      }
+      // ✅ Fixed: use helper functions for both amount and due_date
+      const multiplier = getAmountMultiplier(value);
+      const updatedAmount = selectedEnrollment?.price
+        ? (parseFloat(selectedEnrollment.price) * multiplier).toFixed(2)
+        : paymentForm.original_amount;
+
       updatedPayment = {
         ...paymentForm,
         [name]: value,
         original_amount: updatedAmount,
-        due_date: paymentForm.issue_date.add(dateMultiplier, "month"),
+        due_date: calculateDueDate(paymentForm.issue_date, value), // ✅ Fixed
       };
-    } else if (
-      name === "issue_date" ||
-      name === "due_date" ||
-      name === "payment_date"
-    ) {
+    } else if (name === "issue_date") {
+      // ✅ Fixed: recalculate due_date based on current period type when issue_date changes
+      updatedPayment = {
+        ...paymentForm,
+        issue_date: value,
+        due_date: calculateDueDate(value, paymentForm.payment_period_type), // ✅ Fixed
+      };
+    } else if (name === "due_date" || name === "payment_date") {
       updatedPayment = {
         ...paymentForm,
         [name]: value,
       };
-      if (name === "issue_date") {
-        let dateMultiplier = 1;
-        switch (paymentForm.payment_period_type) {
-          case "1 Month":
-            dateMultiplier = 1;
-            break;
-          case "2 Months":
-            dateMultiplier = 2;
-            break;
-          case "3 Months":
-            dateMultiplier = 3;
-            break;
-          case "6 Months":
-            dateMultiplier = 6;
-            break;
-          case "12 Months":
-            dateMultiplier = 12;
-            break;
-          default:
-            dateMultiplier = 1;
-        }
-        updatedPayment.due_date = value.add(dateMultiplier, "month");
-      }
     }
+
     setPaymentForm(updatedPayment);
   };
 
@@ -490,39 +488,19 @@ const Payments = () => {
   const handleStudentSelect = (event, value) => {
     setSelectedEnrollment(value);
     if (value) {
-      let amountMultiplier = 1;
-      let dateMultiplier = 1;
-      switch (paymentForm.payment_period_type) {
-        case "1 Month":
-          amountMultiplier = 1;
-          dateMultiplier = 1;
-          break;
-        case "3 Months":
-          amountMultiplier = 3;
-          dateMultiplier = 3;
-          break;
-        case "6 Months":
-          amountMultiplier = 6;
-          dateMultiplier = 6;
-          break;
-        case "12 Months":
-          amountMultiplier = 12;
-          dateMultiplier = 12;
-          break;
-        default:
-          amountMultiplier = 3;
-          dateMultiplier = 3;
-      }
-      const updatedAmount = (
-        parseFloat(value.price || 0) * amountMultiplier
-      ).toFixed(2);
+      // ✅ Fixed: use helper functions for both amount and due_date
+      const multiplier = getAmountMultiplier(paymentForm.payment_period_type);
+      const updatedAmount = (parseFloat(value.price || 0) * multiplier).toFixed(
+        2,
+      );
+
       setPaymentForm((prev) => ({
         ...prev,
         student_id: value.student_id,
         class_id: value.class_id,
         branch_id: value.branch_id,
         original_amount: updatedAmount,
-        due_date: paymentForm.issue_date.add(dateMultiplier, "month"),
+        due_date: calculateDueDate(prev.issue_date, prev.payment_period_type), // ✅ Fixed
         first_name: value.first_name || "",
         last_name: value.last_name || "",
         book: value.book || "",
@@ -534,7 +512,7 @@ const Payments = () => {
         student_id: "",
         original_amount: "0",
         discount_percentage: "0",
-        due_date: paymentForm.issue_date.add(3, "month"),
+        due_date: calculateDueDate(prev.issue_date, prev.payment_period_type), // ✅ Fixed
         first_name: "",
         last_name: "",
         book: "",
@@ -973,6 +951,7 @@ const Payments = () => {
                   }
                   label="Payment Period"
                 >
+                  <MenuItem value="10 Days">10 Days</MenuItem>
                   <MenuItem value="1 Month">1 Month</MenuItem>
                   <MenuItem value="2 Months">2 Months</MenuItem>
                   <MenuItem value="3 Months">3 Months</MenuItem>
